@@ -1,0 +1,39 @@
+name: Daily Automated Commit
+
+on:
+  schedule:
+    # Runs at 09:30 UTC every day (specific hours/minutes, not wildcards)
+    - cron: "30 9 * * *"
+  workflow_dispatch: # Allow manual triggers for testing
+
+jobs:
+  daily-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Step for 24f1002697@ds.study.iitm.ac.in
+        run: |
+          echo "Running automated daily commit workflow"
+          echo "Email: 24f1002697@ds.study.iitm.ac.in"
+
+      - name: Create daily update file
+        run: |
+          mkdir -p daily-updates
+          DATE=$(date -u +"%Y-%m-%d")
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "Daily update for $TIMESTAMP" > daily-updates/update-$DATE.txt
+          echo "Workflow run: ${{ github.run_number }}" >> daily-updates/update-$DATE.txt
+          echo "Repository: ${{ github.repository }}" >> daily-updates/update-$DATE.txt
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add daily-updates/
+          git commit -m "Automated daily update - $(date -u +"%Y-%m-%d %H:%M:%S UTC")" || exit 0
+          git push
